@@ -131,9 +131,9 @@ def score_address(address, cities, pincodes, consolidated_data):
 #Function to initialize and score the address
 def initialize_and_score(input_address):
     # Paths to the CSV files
-    city_file_path = '/workspaces/address-scoring-sr-omuni/master_city_names.csv'  # Adjust the path as necessary
-    pincode_file_path = '/workspaces/address-scoring-sr-omuni/master_pincodes.csv'  # Adjust the path as necessary
-    consolidated_file_path = '/workspaces/address-scoring-sr-omuni/india_city_pincodes_consolidated.csv'  # Adjust the path as necessary
+    city_file_path = 'master_city_names.csv'  # Adjust the path as necessary
+    pincode_file_path = 'master_pincodes.csv'  # Adjust the path as necessary
+    consolidated_file_path = 'india_city_pincodes_consolidated.csv'  # Adjust the path as necessary
 
     # Read data from CSV files
     cities = read_data(city_file_path)
