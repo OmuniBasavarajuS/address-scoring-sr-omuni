@@ -13,39 +13,50 @@
 # limitations under the License.
 
 import streamlit as st
-from streamlit.logger import get_logger
+import csv
+from scoring import initialize_and_score
 
-LOGGER = get_logger(__name__)
+st.set_page_config(page_title="Scoring Page", page_icon="🚀")
 
+# Path to the CSV file for persistent storage
+HISTORY_CSV = 'address_history.csv'
+
+def save_history(address, score):
+    """Save a new entry to the CSV file."""
+    with open(HISTORY_CSV, mode='a', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=['address', 'score'])
+        if file.tell() == 0:
+            writer.writeheader()  # File is empty, write header
+        writer.writerow({'address': address, 'score': score})
 
 def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+    
+    # Load history data from CSV
+    #history_data = load_history()
 
-    st.write("# Welcome to Streamlit! 👋")
+    # Main app layout
+    #main_col, history_col = st.columns([3, 1])
 
-    st.sidebar.success("Select a demo above.")
+    #with main_col:
+    st.write("# Address Scoring Optimized 🚀")
+    address = st.text_input("Enter Address", "")
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+    if st.button("Check Scoring"):
+        with st.spinner('Calculating score...'):
+            score, messages = initialize_and_score(address)
+            # Save the new address and score to the history CSV
+            save_history(address, score)
+            # Update the in-memory history data
+            #history_data.append({'address': address, 'score': score})
+            for message in messages:
+                st.text(message)  # Display each message
+            st.markdown(f"### Score: {score}")
 
+    # with history_col:
+    #     st.write("## History")
+    #     # Display the history from in-memory data
+    #     for item in reversed(history_data):
+    #         st.text(f"Address: {item['address']}\nScore: {item['score']}")
 
 if __name__ == "__main__":
     run()
