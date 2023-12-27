@@ -68,6 +68,7 @@ def score_address(address, cities, pincodes, consolidated_data):
     max_score_low_priority_words = 10    # Lower score for low-priority words
     max_score_city = 10           # Max score for city
     max_score_pincode = 10        # Max score for pincode
+    negative_score_no_pincode = 70 # Pincode not found then give negative weightage  
     max_score_both = 35           # Max score if both city and pincode are found
 
     # Check for special characters
@@ -85,17 +86,17 @@ def score_address(address, cities, pincodes, consolidated_data):
     # Check for repeating letters (more than 3 times consecutively)
     if re.search(r"(.)\1{3,}", upper_address):
         score -= negative_weightage_repeating_letters
-        print("Repeating letters found in the address.")
+        messages.append("Repeating letters found in the address.")
 
     # Check for numbers in series (more than 6 digits)
     if re.search(r"0123456|1234567|2345678|3456789|9876543|8765432|7654321|6543210", upper_address):
         score -= negative_weightage_numbers_in_series
-        print("Numbers in series found in the address.")
+        messages.append("Numbers in series found in the address.")
     
     # Check for alphabetical series longer than 4 characters
     if re.search(r"(?=(A(?=B(?=C(?=D(?=E))))))|(?=(B(?=C(?=D(?=E(?=F))))))|(?=(C(?=D(?=E(?=F(?=G))))))|(?=(D(?=E(?=F(?=G(?=H))))))|(?=(E(?=F(?=G(?=H(?=I))))))|(?=(F(?=G(?=H(?=I(?=J))))))|(?=(G(?=H(?=I(?=J(?=K))))))|(?=(H(?=I(?=J(?=K(?=L))))))|(?=(I(?=J(?=K(?=L(?=M))))))|(?=(J(?=K(?=L(?=M(?=N))))))|(?=(K(?=L(?=M(?=N(?=O))))))|(?=(L(?=M(?=N(?=O(?=P))))))|(?=(M(?=N(?=O(?=P(?=Q))))))|(?=(N(?=O(?=P(?=Q(?=R))))))|(?=(O(?=P(?=Q(?=R(?=S))))))|(?=(P(?=Q(?=R(?=S(?=T))))))|(?=(Q(?=R(?=S(?=T(?=U))))))|(?=(R(?=S(?=T(?=U(?=V))))))|(?=(S(?=T(?=U(?=V(?=W))))))|(?=(T(?=U(?=V(?=W(?=X))))))|(?=(U(?=V(?=W(?=X(?=Y))))))|(?=(V(?=W(?=X(?=Y(?=Z))))))", upper_address):
         score -= negative_weightage_alphabetical_series
-        print("Alphabetical series longer than 4 characters found in the address.")
+        messages.append("Alphabetical series longer than 4 characters found in the address.")
 
     # Additional weightage parameters
     positive_weightage_small_number = 25
@@ -104,10 +105,10 @@ def score_address(address, cities, pincodes, consolidated_data):
     # Check for numbers less than 5 digits
     if re.search(r"\b\d{1,4}\b", upper_address):
         score += positive_weightage_small_number
-        print("Number with less than 5 digits found in the address.")
+        messages.append("Number with less than 5 digits found in the address.")
     else:
         score -= negative_weightage_no_small_number
-        print("No number with less than 5 digits found in the address.")
+        messages.append("No number with less than 5 digits found in the address.")
     
     # Additional weightage parameters
     positive_weightage_number_prefix = 10
@@ -117,17 +118,17 @@ def score_address(address, cities, pincodes, consolidated_data):
     # Check for numbers not greater than 4 digits preceded by #, No, or Number
     if re.search(r"(#|NO|NUMBER|NO.|NO )\s*\d{1,4}", upper_address):
         score += positive_weightage_number_prefix
-        print("Number preceded by #, No, or Number found in the address.")
+        messages.append("Number preceded by #, No, or Number found in the address.")
 
     # Check for 'th', 'rd' not preceded by numbers
     if re.search(r"\b(?<!\d)(ST|TH|RD)\b", upper_address):
         score -= negative_weightage_suffix_without_number
-        print("'st', th' or 'rd' found in the address without preceding numbers.")
+        messages.append("'st', th' or 'rd' found in the address without preceding numbers.")
 
     # Check for words like 'Main', 'Road', 'Cross', 'Street' preceded by number and 'th', 'rd'
     if re.search(r"\d{1,4}(ST|TH|RD)\s+(MAIN|ROAD|CROSS|STREET|ST.|RD.)", upper_address):
         score += positive_weightage_number_and_suffix
-        print("Words like 'Main', 'Road', 'Cross', 'Street' preceded by number and 'th', 'rd' found in the address.")
+        messages.append("Words like 'Main', 'Road', 'Cross', 'Street' preceded by number and 'th', 'rd' found in the address.")
 
    # Split address into individual components for better matching
     address_components = re.findall(r'\b\w+\b', upper_address)
@@ -160,6 +161,9 @@ def score_address(address, cities, pincodes, consolidated_data):
     if pincode_found:
         score += max_score_pincode
         messages.append("Pincode found in the address.")
+    else:
+        score -= negative_score_no_pincode
+        messages.append("Pincode not found in the address")
 
     # Additional score if both city and pincode are found
     for city, pincode in consolidated_data:
