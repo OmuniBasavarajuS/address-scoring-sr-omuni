@@ -96,6 +96,18 @@ def score_address(address, cities, pincodes, consolidated_data):
     if re.search(r"(?=(A(?=B(?=C(?=D(?=E))))))|(?=(B(?=C(?=D(?=E(?=F))))))|(?=(C(?=D(?=E(?=F(?=G))))))|(?=(D(?=E(?=F(?=G(?=H))))))|(?=(E(?=F(?=G(?=H(?=I))))))|(?=(F(?=G(?=H(?=I(?=J))))))|(?=(G(?=H(?=I(?=J(?=K))))))|(?=(H(?=I(?=J(?=K(?=L))))))|(?=(I(?=J(?=K(?=L(?=M))))))|(?=(J(?=K(?=L(?=M(?=N))))))|(?=(K(?=L(?=M(?=N(?=O))))))|(?=(L(?=M(?=N(?=O(?=P))))))|(?=(M(?=N(?=O(?=P(?=Q))))))|(?=(N(?=O(?=P(?=Q(?=R))))))|(?=(O(?=P(?=Q(?=R(?=S))))))|(?=(P(?=Q(?=R(?=S(?=T))))))|(?=(Q(?=R(?=S(?=T(?=U))))))|(?=(R(?=S(?=T(?=U(?=V))))))|(?=(S(?=T(?=U(?=V(?=W))))))|(?=(T(?=U(?=V(?=W(?=X))))))|(?=(U(?=V(?=W(?=X(?=Y))))))|(?=(V(?=W(?=X(?=Y(?=Z))))))", upper_address):
         score -= negative_weightage_alphabetical_series
         print("Alphabetical series longer than 4 characters found in the address.")
+
+    # Additional weightage parameters
+    positive_weightage_small_number = 25
+    negative_weightage_no_small_number = 80
+
+    # Check for numbers less than 5 digits
+    if re.search(r"\b\d{1,4}\b", upper_address):
+        score += positive_weightage_small_number
+        print("Number with less than 5 digits found in the address.")
+    else:
+        score -= negative_weightage_no_small_number
+        print("No number with less than 5 digits found in the address.")
     
     # Additional weightage parameters
     positive_weightage_number_prefix = 10
